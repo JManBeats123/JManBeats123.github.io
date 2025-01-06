@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<!--
+Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+Click nbfs://nbhost/SystemFileSystem/Templates/Other/html.html to edit this template
+-->
+<html>
+    <head>
+        <title>TODO supply a title</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="shortcut icon" type="image/x-icon" href="frog_logoicon2.ico" />
+    </head>
+    <body>
+        <div></div>
+        <canvas id="canvas" width="800" height="600" style="border:1px white" tabindex="1"></canvas>
+        <script>
+            var ctx;
+            var WIDTH;
+            var HEIGHT;
+            function init() {
+                ctx = document.getElementById('canvas').getContext('2d');
+                //attempt full screen
+                //ctx.canvas.width  = window.innerWidth;
+                //ctx.canvas.height = window.innerHeight;
+                WIDTH = ctx.canvas.width;
+                HEIGHT = ctx.canvas.height;
+                requestAnimationFrame(draw);
+                //return setInterval(draw, 10);
+            }
+
+
+            function circle(x, y, r) {// Create a circle function
+                ctx.beginPath();
+                ctx.arc(x, y, r, 0, Math.PI * 2, true);
+                ctx.closePath();
+                ctx.fill();
+            }
+
+
+            function rect(x, y, w, h) { // Create a rect function
+                ctx.beginPath();
+                ctx.rect(x, y, w, h);
+                ctx.closePath();
+                ctx.fill();
+            }
+
+
+            function clear() {
+                ctx.fillStyle = "#000000"; //black
+                rect(0, 0, WIDTH, HEIGHT);
+            }
+
+
+            let countdown = 20; // Countdown from 20 seconds
+            let countdownTimer; // Store the timer reference
+
+            function timer() {
+                if (!countdownTimer) { // Start the timer only once
+                    countdownTimer = setInterval(() => {
+                        countdown--; // Subtract one sec
+                        if (countdown < 0 && gameState === "play") { // if the timer is less than 0
+                            clearInterval(countdownTimer);
+                            countdownTimer = null; // Reset the timer reference
+                            gameState = "lose";// Set the game state to lose
+
+                        }
+                    }, 1000);
+                }
+            }
+
+
+
+            // Load my colors
+            green = "#8bca84";
+            white = "#FFFFFF";
+            black = "#000000";
+            blue = "#0099CC";
+            red = "#ff2c2c";
+            yellow = "#FFD116";
+            orange = "#FFA500";
+            grey = "#A9A9A9";
+
+            // Load cars
+            var blackViper = new Image(); // Set new image
+            blackViper.src = "Black_viper.png";  // Ensure this path is correct
+
+            var miniVan = new Image(); // Set new image
+            miniVan.src = "Mini_van.png";  // Ensure this path is correct
+
+            var miniTruck = new Image(); // Set new image
+            miniTruck.src = "Mini_truck.png";  // Ensure this path is correct
+
+            var audi = new Image(); // Create new var for the audi
+            audi.src = "Audi.png";  // Ensure this path is correct
+
+            var truck = new Image(); // Create new var for the truck
+            truck.src = "truck.png";  // Ensure this path is correct
+
+            var stillFrogImage = new Image(); // Create new var for the frog stationary
+            stillFrogImage.src = "Frog_stationary.png";  // Ensure this path is correct
+
+            var frogUpImage = new Image(); // Create new var for the frog jump up
+            frogUpImage.src = "frogJump_forward.png";  // Ensure this path is correct
+
+            var frogLeftImage = new Image(); // Create new var for the frog jump up
+            frogLeftImage.src = "frogJump_left.png";  // Ensure this path is correct
+
+            var frogDownImage = new Image(); // Create new var for the frog jump up
+            frogDownImage.src = "frogJump_down.png";  // Ensure this path is correct
+
+            var frogRightImage = new Image(); // Create new var for the frog jump up
+            frogRightImage.src = "frogJump_right.png";  // Ensure this path is correct
+            
+            var winImage = new Image(); // Create new var for the frog jump up
+            winImage.src = "winScreen.png";  // Ensure this path is correct
+
+            // Set car positions (Just x pos)
+            car1x = -250; // Set for car 1
+            car2x = 880; // Set for car 2
+            car3x = -500; // Set for car 3
+            car4x = 925; // Set for car 4
+            car5x = 1200; // Set for car 5
+            
+            frogWidth = 30;
+            frogHeight = 30;
+
+
+            function road() { // Create a road function
+                ctx.fillStyle = black; // Set the fill color to black
+                rect(0, 300, 800, 250); // Create a balck rectangle as base for our road
+                ctx.fillStyle = yellow; // Set the fill color to white
+                for (let i = 0; i < 800; i += 50) { // Use a for loop for x pos of white stripes (repeat in 50 px intervaals)
+                    rect(i, 420, 25, 10); // Draw white rects in our loop 25*10 px leaving 25 even gap in between strips
+                }
+            }
+            function finishLine() { // Create a road function
+                ctx.fillStyle = black; // Set the fill color to black
+                rect(0, 150, 800, 50); // Create a balck rectangle as base for our road
+                ctx.fillStyle = white; // Set the fill color to white
+                for (let i = 0; i < 800; i += 50) { // Use a for loop for x pos of white stripes (repeat in 50 px intervaals)
+                    rect(i, 150, 25, 25); // Draw white rects in our loop 25*10 px leaving 25 even gap in between strips
+                }
+                for (let i = 25; i < 800; i += 50) { // Use a for loop for x pos of white stripes (repeat in 50 px intervaals)
+                    rect(i, 175, 25, 25); // Draw white rects in our loop 25*10 px leaving 25 even gap in between strips
+                }
+            }
+
+
+            function car1() { // Create a car 1 function
+
+                ctx.drawImage(blackViper, car1x, 400, 125, 125);  // Draw the car at position 
+                if (car1x > 810) { // If the car exceeds 810 (out of frame)
+                    car1x = -250; // Reset the car to -250 (out of frame)
+                }
+                car1x += 2; // Add 2 to x pos (speed is equal to this)
+            }
+
+
+            function car2() {//Create a car 2 function
+
+                ctx.drawImage(miniVan, car2x, 325, 125, 125);  // Draw the car at position 
+                if (car2x < -126) {// If the car exceeds -80 (out of frame)
+                    car2x = 880; // Reset the car to 880 (out of frame)
+                }
+                car2x -= 2.5; // Subtract 2 from x pos (car is moving left equal to this)
+            }
+
+
+            function car3() {// Create a car 3 function
+
+                ctx.drawImage(miniTruck, car3x, 460, 125, 125);  // Draw the car at position 
+                if (car3x > 900) {// If the car exceeds 900 (out of frame)
+                    car3x = -500; // Reset the car to -500 (out of frame)
+                }
+                car3x += 3; // Add 3 to x pos (equal to car speed)
+            }
+
+
+            function car4() {// Create a car 4 function
+
+                ctx.drawImage(audi, car4x, 275, 125, 125);  // Draw the car at position (carx, 275) 
+                if (car4x < -200) {// If the car exceeds -90 (out of frame)
+                    car4x = 925; // Reset the car to 925 (out of frame)
+                }
+                car4x -= 3; // Subtract 3 from x pos (moving left and equal to car speed)
+            }
+
+
+            function car5() {// Create a car 5 function
+
+                ctx.drawImage(truck, car5x, 240, 180, 180);  // Draw the car at position (carx, 275) 
+                if (car5x < -200) {// If the car exceeds -90 (out of frame)
+                    car5x = 925; // Reset the car to 925 (out of frame)
+                }
+                car5x -= 3; // Subtract 3 from x pos (moving left and equal to car speed)
+            }
+
+
+            function cars() { // Create a cars function to easily diplay cars
+                car1(); // Use car 1 function
+                car2(); // Use car 2 function
+                car3(); // Use car 3 function
+                car4(); // Use car 4 function
+                car5(); // Use car 5 function
+
+
+            }
+
+            //Set the frog key presses all to false
+            var frogUp = false;
+            var frogDown = false;
+            var frogLeft = false;
+            var frogRight = false;
+            var frogStill = true;
+
+            // Set initial frog pos 
+            var frogX = 550;
+            var frogY = 550;
+
+            window.addEventListener("keydown", onKeyDown, false);
+            window.addEventListener("keyup", onKeyUp, false);
+
+            function onKeyDown(evt) {
+                //down = w
+                if (evt.keyCode === 13) { // If Enter is pressed
+                    if (gameState === "home") {
+                        gameState = "rules"; // Switch from home to rules
+                    } else if (gameState === "rules") {
+                        gameState = "home"; // Switch back from rules to home
+                    }
+                }
+                if (evt.keyCode === 32) {// if space bar is pressed
+                    if (gameState === "home") {
+                        gameState = "play";
+                        countdown = 20;// Reset the timer
+
+
+
+
+                    } else if (gameState === "lose" || gameState === "win") {
+                        frogX = 550;
+                        frogY = 550;
+                        gameState = "home";
+
+                    }
+
+                }
+                if (evt.keyCode === 87 && gameState === "play" && frogUp === false && frogDown === false && frogLeft === false && frogRight === false) {// if w is pressed
+                    frogUp = true;
+                    frogStill = false;
+                    frogY -= 30;
+
+                }
+                if (evt.keyCode === 65 && gameState === "play" && frogUp === false && frogDown === false && frogLeft === false && frogRight === false) {// a is pressed
+                    frogLeft = true;
+                    frogStill = false;
+                    frogX -= 30;
+
+                }
+                if (evt.keyCode === 83 && gameState === "play" && frogUp === false && frogDown === false && frogLeft === false && frogRight === false) {// if s is pressed
+                    frogDown = true;
+                    frogStill = false;
+                    frogY += 30;
+
+                }
+                if (evt.keyCode === 68 && gameState === "play" && frogUp === false && frogDown === false && frogLeft === false && frogRight === false) {// if d is pressed
+                    frogRight = true;
+                    frogStill = false;
+                    frogX += 30;
+
+                }
+            }
+
+            function onKeyUp(evt) {
+                if (evt.keyCode === 87) {
+                    frogUp = false;
+                    frogStill = true;
+                }
+                if (evt.keyCode === 65) {
+                    frogLeft = false;
+                    frogStill = true;
+                }
+                if (evt.keyCode === 83) {
+                    frogDown = false;
+                    frogStill = true;
+                }
+                if (evt.keyCode === 68) {
+                    frogRight = false;
+                    frogStill = true;
+                }
+            }
+
+            function frogLook() {
+                if (frogStill === true) {
+                    ctx.drawImage(stillFrogImage, frogX, frogY, 30, 30);  // Draw the frog at position 
+                    frogWidth = 30;
+                    frogHeight = 30;
+                }
+                if (frogUp === true) {
+                    ctx.drawImage(frogUpImage, frogX, frogY, 43, 47);  // Draw the frog at position 
+                    frogWidth = 43;
+                    frogHeight = 47;
+                }
+                if (frogLeft === true) {
+                    ctx.drawImage(frogLeftImage, frogX, frogY, 47, 43);  // Draw the frog at position 
+                    frogWidth = 47;
+                    frogHeight = 43;
+                }
+                if (frogDown === true) {
+                    ctx.drawImage(frogDownImage, frogX, frogY, 43, 47);  // Draw the frog at position 
+                    frogWidth = 43;
+                    frogHeight = 47;
+                }
+                if (frogRight === true) {
+                    ctx.drawImage(frogRightImage, frogX, frogY, 47, 43);  // Draw the frog at position 
+                    frogWidth = 47;
+                    frogHeight = 43;
+                }
+
+            }
+            function collisionCheck(frogX, frogY, frogWidth, frogHeight, carX, carY, carWidth, carHeight) {
+                return frogX < carX + carWidth &&
+                        frogX + frogWidth > carX &&
+                        frogY < carY + carHeight &&
+                        frogY + frogHeight > carY;
+            }
+
+            function collision() {
+                if (collisionCheck(frogX, frogY, 30, 30, car1x+10, 430, 110, 55) ||
+                        collisionCheck(frogX, frogY, 30, 30, car2x+10, 368, 105, 45) ||
+                        collisionCheck(frogX, frogY, 30, 30, car3x+5, 493, 105, 50) ||
+                        collisionCheck(frogX, frogY, 30, 30, car4x+15, 312, 105, 50) ||
+                        collisionCheck(frogX, frogY, 30, 30, car5x+15, 312, 157, 50)) {
+                    gameState = "lose";
+                    return; // Exit as soon as a collision is detected
+                }
+            }
+
+
+
+
+
+
+            function background() {// Create a background function
+                ctx.fillStyle = green; // Set the fill color to green
+                rect(0, 200, 800, 400); // Set the home background to green
+                ctx.fillStyle = blue; // Set the fill color to blue
+                rect(0, 0, 800, 250); // Draw a rect which later will act as water
+                road(); // Use road function to draw a road
+            }
+
+
+            function homeText() {// Create a home text function for all text to be displayed on home screen
+                ctx.fillStyle = white; // Set the fill color to white
+                ctx.font = "50px Ariel"; // Set the font size and font type
+                ctx.fillStyle = black; // Set the fill color to black
+
+                ctx.fillText("FROGGY DASH", 230, 85); //Write the title in black (dropshadow)
+                ctx.fillStyle = white; // Set the fill color to white
+                ctx.fillText("FROGGY DASH", 225, 80); // Write the title in white (on top of dropshadow)
+                ctx.font = "30px Ariel"; // Set the font size and font type
+                ctx.fillText("Press Enter for the Rules", 250, 150); // Write the key bind so user knows how to get to rules (enter)
+                ctx.fillText("Press Space to play", 275, 190); // Write the key bind so user knows how to get to play (space)
+
+            }
+
+
+            function homeScreen() { // Group all functions together so that it's organized under home
+                background(); // Use the background function
+                cars(); // Use the cars function
+                homeText(); // Use the home text function
+
+            }
+            function ruleScreen() {
+                ctx.fillStyle = blue; // Set the fill color to green
+                rect(0, 0, 800, 600); // Draw the background in green
+                ctx.fillStyle = white; // Set the fill color to white
+                ctx.font = "50px Ariel"; // Set the font size
+                ctx.fillText("Rules for the game:", 10, 50); // Write the rules for the game
+                ctx.font = "40px Ariel"; // change the font size
+                ctx.fillText("Press W to move forward", 10, 90); // Write w-forward
+                ctx.fillText("Press A to move left", 10, 130); // Write a-left
+                ctx.fillText("Press S to move backward", 10, 170); // Write s-back
+                ctx.fillText("Press D to move right", 10, 210); // Write d-right
+                ctx.fillText("Avoid the cars and get to the end", 10, 250); // Write to avoid cars to get to the end
+                ctx.fillText("Have fun", 10, 290); // Write have fun
+
+                var lilyPad = new Image(); // Create new var for the lily pad
+                lilyPad.src = "Lily_pad.png";  // Ensure this path is correct
+                ctx.drawImage(lilyPad, 50, 350, 180, 180);  // Draw the lily pad 
+
+
+            }
+
+            function playScreen() { // Create a function for the play screen
+                background(); // Use background function
+                cars(); // Use cars funnction
+                timer(); // Use the timer fnuction
+                
+                finishLine();
+
+
+                ctx.fillStyle = white; // Set text color
+                ctx.font = "40px Arial"; // Set font size and type
+                ctx.fillText(`Time Left: ${countdown}`, 300, 50); // Draw the countdown
+                frogLook();
+                collision();
+                if(frogY <= 150){
+                    gameState = "win";
+                }
+
+
+
+            }
+            function loseScreen() { // Create a function for lose screen
+                ctx.fillStyle = red; // Set the fill color to white
+                ctx.font = "50px Ariel"; // Set font size to 50px
+                ctx.fillText("Game Over", 250, 250); // Write the rules for the game
+                ctx.fillStyle = white; // Set the fill color to white
+                ctx.fillText("Press Space For Home", 150, 300); // Write the rules for the game
+
+
+
+            }
+            
+            function winScreen(){
+                ctx.drawImage(winImage, -150, 0, 1087, 600); 
+            }
+
+
+
+
+            // Set game state to mainscreen
+            var gameState = "home";
+            //main game loop
+            function draw() {
+
+                //start fresh
+                clear();
+                if (gameState === "home") { // If the game state is set equal to home
+                    homeScreen(); // Draw out the homescreen function
+                } else if (gameState === "rules") {// If the gamestate is set equal to rules
+                    ruleScreen(); // Draw out the rulescreen function
+
+                } else if (gameState === "play") { // If the gamestate is set equal to play
+                    playScreen(); // Draw and play the game
+
+                } else if (gameState === "lose") { // If the gamestate is set equal to lose
+                    loseScreen();// Draw the lose screen
+
+                }else if (gameState === "win"){
+                    winScreen();
+                }
+
+                requestAnimationFrame(draw);
+            }
+            //force the title
+            document.title = "Froggy Dash";
+            //give the canvas focus
+            document.getElementById('canvas').focus();
+            //call the init function when the page loads
+            window.addEventListener("load", init, false);
+            //call the key press functions when keys are pressed
+        </script>
+    </body>
+</html>
+
+
